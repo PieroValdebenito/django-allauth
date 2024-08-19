@@ -23,7 +23,7 @@ INSTALLED_APPS = (
     "django.contrib.admin",
     "django.contrib.humanize",
     "allauth",
-    "allauth.account",
+    "allauth_account",
     "allauth.mfa",
     "allauth.socialaccount",
     "allauth.usersessions",
