@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
                     "email_address",
                     models.ForeignKey(
                         verbose_name="email address",
-                        to="account.EmailAddress",
+                        to="allauth_account.EmailAddress",
                         on_delete=models.CASCADE,
                     ),
                 ),
