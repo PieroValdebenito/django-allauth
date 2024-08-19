@@ -1,44 +1,43 @@
-import requests
 from hashlib import md5
 
+from allauth.socialaccount.adapter import get_adapter
 from allauth.socialaccount.providers.oauth2.views import (
     OAuth2Adapter,
     OAuth2CallbackView,
     OAuth2LoginView,
 )
 
-from .provider import OdnoklassnikiProvider
-
 
 USER_FIELDS = [
-    "uid",
-    "locale",
-    "first_name",
-    "last_name",
-    "name",
-    "gender",
     "age",
     "birthday",
-    "has_email",
     "current_status",
-    "current_status_id",
     "current_status_date",
+    "current_status_id",
+    "email",
+    "first_name",
+    "gender",
+    "has_email",
+    "last_name",
+    "locale",
+    "location",
+    "name",
     "online",
     "photo_id",
-    "pic_1",  # aka pic50x50
-    "pic_2",  # aka pic128max
+    "pic1024x768",  # big
     "pic190x190",  # small
     "pic640x480",  # medium
-    "pic1024x768",  # big
-    "location",
+    "pic_1",  # aka pic50x50
+    "pic_2",  # aka pic128max
+    "uid",
 ]
 
 
 class OdnoklassnikiOAuth2Adapter(OAuth2Adapter):
-    provider_id = OdnoklassnikiProvider.id
-    access_token_url = "http://api.odnoklassniki.ru/oauth/token.do"
-    authorize_url = "http://www.odnoklassniki.ru/oauth/authorize"
-    profile_url = "http://api.odnoklassniki.ru/fb.do"
+    provider_id = "odnoklassniki"
+    access_token_url = "https://api.odnoklassniki.ru/oauth/token.do"
+    authorize_url = "https://www.odnoklassniki.ru/oauth/authorize"
+    profile_url = "https://api.odnoklassniki.ru/fb.do"
     access_token_method = "POST"
 
     def complete_login(self, request, app, token, **kwargs):
@@ -57,7 +56,9 @@ class OdnoklassnikiOAuth2Adapter(OAuth2Adapter):
         )
         data["sig"] = md5(("".join(check_list) + suffix).encode("utf-8")).hexdigest()
 
-        response = requests.get(self.profile_url, params=data)
+        response = (
+            get_adapter().get_requests_session().get(self.profile_url, params=data)
+        )
         extra_data = response.json()
         return self.get_provider().sociallogin_from_response(request, extra_data)
 

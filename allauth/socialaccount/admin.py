@@ -1,20 +1,29 @@
+from typing import List
+
 from django import forms
 from django.contrib import admin
 
+from allauth import app_settings
 from allauth.account.adapter import get_adapter
-
-from .models import SocialAccount, SocialApp, SocialToken
+from allauth.socialaccount import providers
+from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 
 
 class SocialAppForm(forms.ModelForm):
     class Meta:
         model = SocialApp
-        exclude = []
+        exclude: List[str] = []
         widgets = {
             "client_id": forms.TextInput(attrs={"size": "100"}),
             "key": forms.TextInput(attrs={"size": "100"}),
             "secret": forms.TextInput(attrs={"size": "100"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["provider"] = forms.ChoiceField(
+            choices=providers.registry.as_choices()
+        )
 
 
 class SocialAppAdmin(admin.ModelAdmin):
@@ -23,7 +32,7 @@ class SocialAppAdmin(admin.ModelAdmin):
         "name",
         "provider",
     )
-    filter_horizontal = ("sites",)
+    filter_horizontal = ("sites",) if app_settings.SITES_ENABLED else ()
 
 
 class SocialAccountAdmin(admin.ModelAdmin):
@@ -52,7 +61,7 @@ class SocialTokenAdmin(admin.ModelAdmin):
             ret = ret[0:max_chars] + "...(truncated)"
         return ret
 
-    truncated_token.short_description = "Token"
+    truncated_token.short_description = "Token"  # type: ignore[attr-defined]
 
 
 admin.site.register(SocialApp, SocialAppAdmin)
